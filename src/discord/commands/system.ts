@@ -18,10 +18,6 @@ export const system: Command = {
           fields: [
             {
               name: 'CPU',
-              value: `${os.cpus().length}x ${os.cpus()[0].model}`,
-            },
-            {
-              name: 'CPU Usage',
               value: `${Math.round(os.loadavg()[0] * 100) / 100}%`,
             },
             {
