@@ -3,6 +3,11 @@ import pm2 from 'pm2'
 
 import type { Command } from '../../types'
 import { log } from '../../services/logger'
+import {
+  formatMemory,
+  getFormattedCPU,
+  getFormattedUptime,
+} from '../../services/system'
 
 export const pm2Command: Command = {
   data: new SlashCommandBuilder()
@@ -72,27 +77,19 @@ export const pm2Command: Command = {
                   fields: [
                     {
                       name: 'CPU',
-                      value: `${process.monit?.cpu}%`,
+                      value: getFormattedCPU(process.monit?.cpu || 0),
                     },
                     {
                       name: 'Memory',
-                      value: `${(
-                        (process.monit?.memory || 0) /
-                        1024 /
-                        1024
-                      ).toFixed(2)}MB`,
+                      value: formatMemory(process.monit?.memory || 0),
                     },
                     {
                       name: 'Uptime',
-                      value: `${
-                        process.pm2_env?.status === 'online'
-                          ? (
-                              (process.pm2_env?.pm_uptime
-                                ? Date.now() - process.pm2_env?.pm_uptime
-                                : 0) / 3_600_000
-                            ).toFixed(2)
-                          : 0
-                      } hours`,
+                      value: getFormattedUptime(
+                        process.pm2_env?.pm_uptime && process.pm2_env?.status === 'online'
+                          ? (Date.now() - process.pm2_env?.pm_uptime) / 1000
+                          : 0,
+                      ),
                     },
                   ],
                 }

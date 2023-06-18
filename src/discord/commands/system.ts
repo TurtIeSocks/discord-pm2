@@ -3,6 +3,11 @@ import os from 'os'
 
 import type { Command } from '../../types'
 import { log } from '../../services/logger'
+import {
+  getFormattedCPU,
+  getFormattedUptime,
+  getFormattedMemory,
+} from '../../services/system'
 
 export const system: Command = {
   data: new SlashCommandBuilder()
@@ -18,17 +23,15 @@ export const system: Command = {
           fields: [
             {
               name: 'CPU',
-              value: `${Math.round(os.loadavg()[0] * 100) / 100}%`,
+              value: getFormattedCPU(),
             },
             {
               name: 'Memory',
-              value: `${Math.round(
-                (os.totalmem() - os.freemem()) / 1024 / 1024,
-              )} MB / ${Math.round(os.totalmem() / 1024 / 1024)} MB`,
+              value: getFormattedMemory(),
             },
             {
               name: 'Uptime',
-              value: `${Math.round(os.uptime() / 60 / 60)} hours`,
+              value: getFormattedUptime(),
             },
           ],
         },
