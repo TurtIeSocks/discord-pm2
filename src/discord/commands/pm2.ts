@@ -34,6 +34,7 @@ export const pm2Command: Command = {
         { name: 'stop', value: 'stop' },
         { name: 'restart', value: 'restart' },
         { name: 'flush', value: 'flush' },
+        { name: 'list', value: 'list' },
       ])
     } else if (focusedOption?.name === 'name') {
       pm2.list(async (err, processDescriptionList) => {
@@ -52,25 +53,58 @@ export const pm2Command: Command = {
   },
   run: async (interaction) => {
     const rawCommand = interaction.options.get('command', true)
-    const command = rawCommand.value as 'start' | 'stop' | 'restart' | 'flush'
+    const command = rawCommand.value as
+      | 'start'
+      | 'stop'
+      | 'restart'
+      | 'flush'
+      | 'list'
     const name = (interaction.options.get('name')?.value || 'all') as string
 
     if (command && name) {
-      pm2[command](name, (err, _) => {
-        if (err) {
-          log.error(err)
-          interaction.reply({
-            content: `Error: ${err.message}`,
-            ephemeral: true,
-          })
-        } else {
-          log.info(`PM2 ${command}ed ${name}`, interaction.user.username)
-          interaction.reply({
-            content: `${command}${command === 'stop' ? 'p' : ''}ed ${name} `,
-            ephemeral: true,
-          })
-        }
-      })
+      if (command === 'list') {
+        pm2.list((err, processList) => {
+          if (err) {
+            log.error(err)
+            interaction.reply({
+              content: `Error: ${err.message}`,
+              ephemeral: true,
+            })
+          } else {
+            interaction.reply({
+              embeds: processList.map((process) => ({
+                title: `${process.name} - ${process.pm2_env?.status}`,
+                fields: [
+                  {
+                    name: 'CPU',
+                    value: `${process.monit?.cpu}%`,
+                  },
+                  {
+                    name: 'Memory',
+                    value: `${((process.monit?.memory || 0) / 1024 / 1024).toFixed(2)}MB`,
+                  },
+                ]
+              }))
+            })
+          }
+        } )
+      } else {
+        pm2[command](name, (err, _) => {
+          if (err) {
+            log.error(err)
+            interaction.reply({
+              content: `Error: ${err.message}`,
+              ephemeral: true,
+            })
+          } else {
+            log.info(`PM2 ${command}ed ${name}`, interaction.user.username)
+            interaction.reply({
+              content: `${command}${command === 'stop' ? 'p' : ''}ed ${name} `,
+              ephemeral: true,
+            })
+          }
+        })
+      }
     }
   },
 }
