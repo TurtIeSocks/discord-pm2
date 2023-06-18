@@ -83,6 +83,10 @@ export const pm2Command: Command = {
                     name: 'Memory',
                     value: `${((process.monit?.memory || 0) / 1024 / 1024).toFixed(2)}MB`,
                   },
+                  {
+                    name: 'Uptime',
+                    value: `${Math.round((process.pm2_env?.pm_uptime || 0) / 60 / 60)} hours`,
+                  }
                 ]
               }))
             })

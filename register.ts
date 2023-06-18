@@ -25,7 +25,7 @@ const rest = new REST().setToken(config.get('token'))
       ),
       { body: Object.values(commands).map((cmd) => cmd.data.toJSON()) },
     )
-    console.log(`Successfully registered application commands: ${data}`)
+    console.log(`Successfully registered application commands: ${JSON.stringify(data, null, 2)}`)
   } catch (error) {
     console.error(error)
   }
