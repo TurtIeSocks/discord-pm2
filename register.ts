@@ -3,7 +3,7 @@ import config from 'config'
 
 import * as commands from './src/discord/commands'
 
-const rest = new REST().setToken(config.get('discord.token'))
+const rest = new REST().setToken(config.get('token'))
 
 ;(async () => {
   try {
