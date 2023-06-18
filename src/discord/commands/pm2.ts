@@ -67,11 +67,6 @@ export const pm2Command: Command = {
           } else {
             interaction.reply({
               embeds: processList.map((process) => {
-                console.log(Date.now(), process.pm2_env?.pm_uptime)
-                //   process.pm2_env?.pm_uptime
-                //     ? Date.now() - process.pm2_env?.pm_uptime
-                //     : 0,
-                // )
                 return {
                   title: `${process.name} - ${process.pm2_env?.status}`,
                   fields: [
