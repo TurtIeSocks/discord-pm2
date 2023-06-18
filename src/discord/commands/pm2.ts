@@ -14,7 +14,13 @@ export const pm2Command: Command = {
         .setName('command')
         .setRequired(true)
         .setDescription('Choose the command to execute')
-        .setAutocomplete(true),
+        .addChoices(
+          { name: 'start', value: 'start' },
+          { name: 'stop', value: 'stop' },
+          { name: 'restart', value: 'restart' },
+          { name: 'flush', value: 'flush' },
+          { name: 'list', value: 'list' },
+        ),
     )
     .addStringOption((option) =>
       option
@@ -26,30 +32,18 @@ export const pm2Command: Command = {
         .setAutocomplete(true),
     ),
   autoComplete: async (interaction) => {
-    const focusedOption = interaction.options.getFocused(true)
-
-    if (focusedOption?.name === 'command') {
-      await interaction.respond([
-        { name: 'start', value: 'start' },
-        { name: 'stop', value: 'stop' },
-        { name: 'restart', value: 'restart' },
-        { name: 'flush', value: 'flush' },
-        { name: 'list', value: 'list' },
-      ])
-    } else if (focusedOption?.name === 'name') {
-      pm2.list(async (err, processDescriptionList) => {
-        if (err) {
-          log.error(err)
-        } else {
-          await interaction.respond(
-            processDescriptionList.map((process) => ({
-              name: process.name || '',
-              value: process.name || '',
-            })),
-          )
-        }
-      })
-    }
+    pm2.list(async (err, processDescriptionList) => {
+      if (err) {
+        log.error(err)
+      } else {
+        await interaction.respond(
+          processDescriptionList.map((process) => ({
+            name: process.name || '',
+            value: process.name || '',
+          })),
+        )
+      }
+    })
   },
   run: async (interaction) => {
     const rawCommand = interaction.options.get('command', true)
@@ -72,26 +66,45 @@ export const pm2Command: Command = {
             })
           } else {
             interaction.reply({
-              embeds: processList.map((process) => ({
-                title: `${process.name} - ${process.pm2_env?.status}`,
-                fields: [
-                  {
-                    name: 'CPU',
-                    value: `${process.monit?.cpu}%`,
-                  },
-                  {
-                    name: 'Memory',
-                    value: `${((process.monit?.memory || 0) / 1024 / 1024).toFixed(2)}MB`,
-                  },
-                  {
-                    name: 'Uptime',
-                    value: `${Math.round((process.pm2_env?.pm_uptime || 0) / 60 / 60)} hours`,
-                  }
-                ]
-              }))
+              embeds: processList.map((process) => {
+                console.log(Date.now(), process.pm2_env?.pm_uptime)
+                //   process.pm2_env?.pm_uptime
+                //     ? Date.now() - process.pm2_env?.pm_uptime
+                //     : 0,
+                // )
+                return {
+                  title: `${process.name} - ${process.pm2_env?.status}`,
+                  fields: [
+                    {
+                      name: 'CPU',
+                      value: `${process.monit?.cpu}%`,
+                    },
+                    {
+                      name: 'Memory',
+                      value: `${(
+                        (process.monit?.memory || 0) /
+                        1024 /
+                        1024
+                      ).toFixed(2)}MB`,
+                    },
+                    {
+                      name: 'Uptime',
+                      value: `${
+                        process.pm2_env?.status === 'online'
+                          ? (
+                              (process.pm2_env?.pm_uptime
+                                ? Date.now() - process.pm2_env?.pm_uptime
+                                : 0) / 3_600_000
+                            ).toFixed(2)
+                          : 0
+                      } hours`,
+                    },
+                  ],
+                }
+              }),
             })
           }
-        } )
+        })
       } else {
         pm2[command](name, (err, _) => {
           if (err) {
