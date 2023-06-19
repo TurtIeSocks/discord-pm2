@@ -20,18 +20,18 @@ export const pm2Command: Command = {
         .setRequired(true)
         .setDescription('Choose the command to execute')
         .addChoices(
-          { name: 'start', value: 'start' },
-          { name: 'stop', value: 'stop' },
-          { name: 'restart', value: 'restart' },
-          { name: 'flush', value: 'flush' },
-          { name: 'list', value: 'list' },
+          { name: 'Start', value: 'start' },
+          { name: 'Stop', value: 'stop' },
+          { name: 'Restart', value: 'restart' },
+          { name: 'Flush', value: 'flush' },
+          { name: 'List', value: 'list' },
         ),
     )
     .addStringOption((option) =>
       option
         .setName('name')
         .setDescription(
-          'Enter the name of the PM2 process, leave blank for all',
+          'Enter the name of the PM2 process',
         )
         .setRequired(false)
         .setAutocomplete(true),
@@ -41,12 +41,13 @@ export const pm2Command: Command = {
       if (err) {
         log.error(err)
       } else {
-        await interaction.respond(
-          processDescriptionList.map((process) => ({
+        await interaction.respond([
+          { name: 'all', value: 'all' },
+          ...processDescriptionList.map((process) => ({
             name: process.name || '',
             value: process.name || '',
           })),
-        )
+        ])
       }
     })
   },
@@ -58,7 +59,7 @@ export const pm2Command: Command = {
       | 'restart'
       | 'flush'
       | 'list'
-    const name = (interaction.options.get('name')?.value || 'all') as string
+    const name = interaction.options.get('name')?.value as string
 
     if (command && name) {
       if (command === 'list') {
@@ -86,7 +87,8 @@ export const pm2Command: Command = {
                     {
                       name: 'Uptime',
                       value: getFormattedUptime(
-                        process.pm2_env?.pm_uptime && process.pm2_env?.status === 'online'
+                        process.pm2_env?.pm_uptime &&
+                          process.pm2_env?.status === 'online'
                           ? (Date.now() - process.pm2_env?.pm_uptime) / 1000
                           : 0,
                       ),

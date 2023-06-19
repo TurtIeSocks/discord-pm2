@@ -9,8 +9,8 @@
     "start": "node .",
     "build": "tsc",
     "watch": "tsc -w",
-    "dev": "nodemon dist/index.js",
-    "register": "ts-node register"
+    "dev": "NODE_ENV=development nodemon dist/index.js",
+    "register": "ts-node src/discord/register.ts"
   },
   "dependencies": {
     "chalk": "^4",

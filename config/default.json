@@ -1,6 +1,5 @@
 {
   "token": "your-discord-token",
   "clientId": "your-discord-client-id",
-  "activity": "I am a bot",
   "guildId": "your-discord-guild-id"
 }
