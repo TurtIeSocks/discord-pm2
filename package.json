@@ -2,7 +2,7 @@
   "name": "discord-pm2",
   "version": "0.1.0",
   "main": "dist/index.js",
-  "author": "Derick M. <58572875+TurtIeSocks@users.noreply.github.com>",
+  "author": "TurtIeSocks <58572875+TurtIeSocks@users.noreply.github.com>",
   "license": "MIT",
   "private": true,
   "scripts": {

@@ -1,5 +1,4 @@
 node_modules
 dist
-.env
 config/local.json
 yarn-error.log
