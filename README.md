@@ -22,6 +22,7 @@ Discord bot to help manage apps with PM2 and view system information
   - `pm2 stop <app>`
   - `pm2 restart <app>`
 - The command provides autocompletion for the available commands and apps
+- Requires admin permissions
 
 ## /system
 
@@ -30,6 +31,7 @@ Returns system information:
 - `CPU Usage`
 - `Memory Usage`
 - `Uptime`
+- Requires admin permissions
 
 # Development
 
