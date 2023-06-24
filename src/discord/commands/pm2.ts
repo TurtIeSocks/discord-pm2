@@ -30,9 +30,7 @@ export const pm2Command: Command = {
     .addStringOption((option) =>
       option
         .setName('name')
-        .setDescription(
-          'Enter the name of the PM2 process',
-        )
+        .setDescription('Enter the name of the PM2 process')
         .setRequired(false)
         .setAutocomplete(true),
     ),
@@ -61,61 +59,59 @@ export const pm2Command: Command = {
       | 'list'
     const name = interaction.options.get('name')?.value as string
 
-    if (command && name) {
-      if (command === 'list') {
-        pm2.list((err, processList) => {
-          if (err) {
-            log.error(err)
-            interaction.reply({
-              content: `Error: ${err.message}`,
-              ephemeral: true,
-            })
-          } else {
-            interaction.reply({
-              embeds: processList.map((process) => {
-                return {
-                  title: `${process.name} - ${process.pm2_env?.status}`,
-                  fields: [
-                    {
-                      name: 'CPU',
-                      value: getFormattedCPU(process.monit?.cpu || 0),
-                    },
-                    {
-                      name: 'Memory',
-                      value: formatMemory(process.monit?.memory || 0),
-                    },
-                    {
-                      name: 'Uptime',
-                      value: getFormattedUptime(
-                        process.pm2_env?.pm_uptime &&
-                          process.pm2_env?.status === 'online'
-                          ? (Date.now() - process.pm2_env?.pm_uptime) / 1000
-                          : 0,
-                      ),
-                    },
-                  ],
-                }
-              }),
-            })
-          }
-        })
-      } else {
-        pm2[command](name, (err, _) => {
-          if (err) {
-            log.error(err)
-            interaction.reply({
-              content: `Error: ${err.message}`,
-              ephemeral: true,
-            })
-          } else {
-            log.info(`PM2 ${command}ed ${name}`, interaction.user.username)
-            interaction.reply({
-              content: `${command}${command === 'stop' ? 'p' : ''}ed ${name} `,
-              ephemeral: true,
-            })
-          }
-        })
-      }
+    if (command === 'list') {
+      pm2.list((err, processList) => {
+        if (err) {
+          log.error(err)
+          interaction.reply({
+            content: `Error: ${err.message}`,
+            ephemeral: true,
+          })
+        } else {
+          interaction.reply({
+            embeds: processList.map((process) => {
+              return {
+                title: `${process.name} - ${process.pm2_env?.status}`,
+                fields: [
+                  {
+                    name: 'CPU',
+                    value: getFormattedCPU(process.monit?.cpu || 0),
+                  },
+                  {
+                    name: 'Memory',
+                    value: formatMemory(process.monit?.memory || 0),
+                  },
+                  {
+                    name: 'Uptime',
+                    value: getFormattedUptime(
+                      process.pm2_env?.pm_uptime &&
+                        process.pm2_env?.status === 'online'
+                        ? (Date.now() - process.pm2_env?.pm_uptime) / 1000
+                        : 0,
+                    ),
+                  },
+                ],
+              }
+            }),
+          })
+        }
+      })
+    } else if (command && name) {
+      pm2[command](name, (err, _) => {
+        if (err) {
+          log.error(err)
+          interaction.reply({
+            content: `Error: ${err.message}`,
+            ephemeral: true,
+          })
+        } else {
+          log.info(`PM2 ${command}ed ${name}`, interaction.user.username)
+          interaction.reply({
+            content: `${command}${command === 'stop' ? 'p' : ''}ed ${name} `,
+            ephemeral: true,
+          })
+        }
+      })
     }
   },
 }
