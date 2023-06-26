@@ -66,19 +66,23 @@ export const monitor: Command = {
         await clearMonitorChannel(interaction.client)
         await interaction.followUp('Monitor stopped')
       } else if (action === 'start') {
-        const interval = interaction.options.get('interval')?.value as
-          | number
-          | undefined
         await clearMonitorChannel(interaction.client)
-        await updateAll(interaction.client)
-        interaction.client.ctx.monitor.interval = setInterval(
-          () => updateAll(interaction.client),
-          1000 * 60 * (interval || 1),
-        )
-        await interaction.followUp('Monitor started')
+        const success = await updateAll(interaction.client)
+        if (success) {
+          const interval = interaction.options.get('interval')?.value as
+            | number
+            | undefined
+          interaction.client.ctx.monitor.interval = setInterval(
+            () => updateAll(interaction.client),
+            1000 * 60 * (interval || 1),
+          )
+          await interaction.followUp('Monitor started')
+        } else {
+          await interaction.followUp('Monitor failed to start')
+        }
       } else {
-        await updateAll(interaction.client)
-        await interaction.followUp('Monitor updated')
+        const success = await updateAll(interaction.client)
+        await interaction.followUp(success ? 'Monitor updated' : 'Monitor failed to update')
       }
       await interaction.deleteReply()
     }

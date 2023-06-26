@@ -299,7 +299,7 @@ export const updateMonitor = async (
 /**
  * Updates all of the monitors
  * @param client Discord.js Client
- * @returns references to the updated messages
+ * @returns success status
  */
 export const updateAll = async (client: Client) => {
   try {
@@ -308,10 +308,12 @@ export const updateAll = async (client: Client) => {
       throw processes
     }
     log.info(HELPERS.discord, 'Updating monitor')
-    return await Promise.all(
+    await Promise.all(
       processes.map(async (process) => updateMonitor(client, process)),
     )
+    return true
   } catch (err) {
     log.error(err)
+    return false
   }
 }
