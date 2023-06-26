@@ -87,25 +87,28 @@ export const getProcessList = async (): Promise<Process[] | Error> => {
         log.error(err)
         return reject(err)
       }
-      const processList: Process[] = processDescriptionList.map((process) => {
-        const pm2Env = process.pm2_env as PM2Env
-        return {
-          name: process.name || 'Unknown Process',
-          cpu: process.monit?.cpu || 0,
-          memory: process.monit?.memory || 0,
-          uptime: pm2Env?.pm_uptime || 0,
-          instances: pm2Env?.instances || 0,
-          unplannedRestarts: pm2Env?.unstable_restarts || 0,
-          plannedRestarts: pm2Env?.restart_time || 0,
-          status: pm2Env?.status || 'stopped',
-          autorestart: pm2Env?.autorestart || false,
-          interpreter: pm2Env?.exec_interpreter || 'Unknown',
-          maxMemoryRestart: pm2Env?.max_memory_restart || 0,
-          execMode: pm2Env?.exec_mode || 'Unknown',
-          version: pm2Env?.version || 'Unknown',
-        }
-      })
-      return resolve(processList)
+      const processList: Record<string, Process> = Object.fromEntries(
+        processDescriptionList.map((process) => {
+          const pm2Env = process.pm2_env as PM2Env
+          const name = process.name || 'Unknown Process'
+          return [name, {
+            name,
+            cpu: process.monit?.cpu || 0,
+            memory: process.monit?.memory || 0,
+            uptime: pm2Env?.pm_uptime || 0,
+            instances: pm2Env?.instances || 0,
+            unplannedRestarts: pm2Env?.unstable_restarts || 0,
+            plannedRestarts: pm2Env?.restart_time || 0,
+            status: pm2Env?.status || 'stopped',
+            autorestart: pm2Env?.autorestart || false,
+            interpreter: pm2Env?.exec_interpreter || 'Unknown',
+            maxMemoryRestart: pm2Env?.max_memory_restart || 0,
+            execMode: pm2Env?.exec_mode || 'Unknown',
+            version: pm2Env?.version || 'Unknown',
+          }]
+        }),
+      )
+      return resolve(Object.values(processList))
     })
   })
 }
