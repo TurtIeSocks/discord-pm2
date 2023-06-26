@@ -2,6 +2,14 @@
 
 Discord bot to help manage apps with PM2 and view system information
 
+<p align="center">
+  <img width="390" alt="embed example" src="./media/embed.png">
+</p>
+
+[![GitHub Release](https://img.shields.io/github/release/TurtIeSocks/discord-pm2.svg)](https://github.com/TurtIeSocks/discord-pm2/releases/)
+[![GitHub Contributors](https://img.shields.io/github/contributors/TurtIeSocks/discord-pm2.svg)](https://github.com/TurtIeSocks/discord-pm2/graphs/contributors/)
+[![Discord](https://img.shields.io/discord/907337201044582452.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/EYYsKPVawn)
+
 ## Installation
 
 1. Clone the repository
@@ -22,6 +30,16 @@ Discord bot to help manage apps with PM2 and view system information
   - `pm2 stop <app>`
   - `pm2 restart <app>`
 - The command provides autocompletion for the available commands and apps
+- Requires admin permissions
+
+## /monitor
+
+- `start <interval>`
+  - Starts monitoring the system with the given interval in seconds
+- `stop`
+  - Stops monitoring the system
+- `update`
+  - Forces an early update of the monitor embeds
 - Requires admin permissions
 
 ## /system

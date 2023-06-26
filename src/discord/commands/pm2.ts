@@ -1,13 +1,15 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
-import pm2 from 'pm2'
 
 import type { Command } from '../../types'
-import { log } from '../../services/logger'
 import {
-  formatMemory,
-  getFormattedCPU,
-  getFormattedUptime,
-} from '../../services/system'
+  GENERAL_INPUTS,
+  Inputs,
+  PROCESS_INPUTS,
+  executeCommon,
+  executeReload,
+  getEmbed,
+  getProcessList,
+} from '../../services/pm2'
 
 export const pm2Command: Command = {
   data: new SlashCommandBuilder()
@@ -20,11 +22,10 @@ export const pm2Command: Command = {
         .setRequired(true)
         .setDescription('Choose the command to execute')
         .addChoices(
-          { name: 'Start', value: 'start' },
-          { name: 'Stop', value: 'stop' },
-          { name: 'Restart', value: 'restart' },
-          { name: 'Flush', value: 'flush' },
-          { name: 'List', value: 'list' },
+          ...[...PROCESS_INPUTS, ...GENERAL_INPUTS].map((input) => ({
+            name: input,
+            value: input.toLowerCase(),
+          })),
         ),
     )
     .addStringOption((option) =>
@@ -35,82 +36,46 @@ export const pm2Command: Command = {
         .setAutocomplete(true),
     ),
   autoComplete: async (interaction) => {
-    pm2.list(async (err, processDescriptionList) => {
-      if (err) {
-        log.error(err)
-      } else {
-        await interaction.respond([
-          { name: 'all', value: 'all' },
-          ...processDescriptionList.map((process) => ({
-            name: process.name || '',
-            value: process.name || '',
-          })),
-        ])
-      }
-    })
+    const processes = await getProcessList()
+
+    if (processes instanceof Error) {
+      await interaction.respond([])
+    } else {
+      await interaction.respond([
+        { name: 'all', value: 'all' },
+        ...processes.map((process) => ({
+          name: process.name,
+          value: process.name,
+        })),
+      ])
+    }
   },
   run: async (interaction) => {
     const rawCommand = interaction.options.get('command', true)
-    const command = rawCommand.value as
-      | 'start'
-      | 'stop'
-      | 'restart'
-      | 'flush'
-      | 'list'
-    const name = interaction.options.get('name')?.value as string
+    const command = rawCommand.value as Inputs
+    const name = interaction.options.get('name')?.value as string | undefined
 
     if (command === 'list') {
-      pm2.list((err, processList) => {
-        if (err) {
-          log.error(err)
-          interaction.reply({
-            content: `Error: ${err.message}`,
-            ephemeral: true,
-          })
-        } else {
-          interaction.reply({
-            embeds: processList.map((process) => {
-              return {
-                title: `${process.name} - ${process.pm2_env?.status}`,
-                fields: [
-                  {
-                    name: 'CPU',
-                    value: getFormattedCPU(process.monit?.cpu || 0),
-                  },
-                  {
-                    name: 'Memory',
-                    value: formatMemory(process.monit?.memory || 0),
-                  },
-                  {
-                    name: 'Uptime',
-                    value: getFormattedUptime(
-                      process.pm2_env?.pm_uptime &&
-                        process.pm2_env?.status === 'online'
-                        ? (Date.now() - process.pm2_env?.pm_uptime) / 1000
-                        : 0,
-                    ),
-                  },
-                ],
-              }
-            }),
-          })
-        }
-      })
-    } else if (command && name) {
-      pm2[command](name, (err, _) => {
-        if (err) {
-          log.error(err)
-          interaction.reply({
-            content: `Error: ${err.message}`,
-            ephemeral: true,
-          })
-        } else {
-          log.info(`PM2 ${command}ed ${name}`, interaction.user.username)
-          interaction.reply({
-            content: `${command}${command === 'stop' ? 'p' : ''}ed ${name} `,
-            ephemeral: true,
-          })
-        }
+      const processes = await getProcessList()
+      if (processes instanceof Error) {
+        await interaction.followUp({
+          content: `Error: ${processes.message}`,
+          ephemeral: true,
+        })
+      } else {
+        await interaction.followUp({
+          content: processes.length ? '' : 'No processes found.',
+          embeds: processes.map((process) => getEmbed(process)),
+        })
+      }
+    } else {
+      const response =
+        command === 'reload'
+          ? await executeReload(name)
+          : await executeCommon(command, name)
+      await interaction.followUp({
+        content: typeof response === 'string' ? response : response.message,
+        ephemeral: true,
       })
     }
   },

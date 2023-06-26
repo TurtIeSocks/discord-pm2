@@ -3,24 +3,27 @@ import config from 'config'
 
 import * as events from './events'
 import * as commands from './commands'
+import { getMonitorChannel } from './utils'
 
-export async function startDiscord() {
+export const startDiscord = async () => {
   const client = new Client({
     intents: ['GuildMessages', 'GuildMembers', 'Guilds', 'DirectMessages'],
   })
 
+  Object.values(events).forEach((event) => event(client))
+
   await client.login(config.get('token'))
 
   client.ctx = {
-    commands: new Collection(),
+    commands: new Collection(
+      Object.values(commands).map((command) => [command.data.name, command]),
+    ),
+    monitor: {
+      messages: new Collection(),
+      channel: await getMonitorChannel(client),
+      interval: null,
+    },
   }
-
-  Object.values(commands).forEach((command) => {
-    client.ctx.commands.set(command.data.name, command)
-  })
-  Object.values(events).forEach((event) => {
-    event(client)
-  })
 
   return client
 }

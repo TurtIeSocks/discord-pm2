@@ -1,3 +1,4 @@
+import { APIEmbed, Colors } from 'discord.js'
 import os from 'os'
 
 const KILOBYTE = 1024
@@ -59,7 +60,7 @@ export const getFormattedUptime = (uptime = os.uptime()) => {
   const days = Math.floor(uptime / SECONDS_IN_DAY)
   const hours = Math.floor((uptime % SECONDS_IN_DAY) / SECONDS_IN_HOUR)
   const minutes = Math.floor((uptime % SECONDS_IN_HOUR) / SECONDS_IN_MINUTES)
-  const seconds = uptime % SECONDS_IN_MINUTES
+  const seconds = Math.floor(uptime % SECONDS_IN_MINUTES)
 
   const formatted: string[] = []
   if (days > 0) {
@@ -76,4 +77,28 @@ export const getFormattedUptime = (uptime = os.uptime()) => {
     formatted.push(seconds + ' second' + (seconds > 1 ? 's' : ''))
   }
   return formatted.join(', ')
+}
+
+/**
+ * Returns a Discord embed with system stats
+ */
+export const getEmbed = (): APIEmbed => {
+  return {
+    title: 'System Status',
+    color: Colors.Blurple,
+    fields: [
+      {
+        name: 'CPU',
+        value: getFormattedCPU(),
+      },
+      {
+        name: 'Memory',
+        value: getFormattedMemory(),
+      },
+      {
+        name: 'Uptime',
+        value: getFormattedUptime(),
+      },
+    ],
+  }
 }
