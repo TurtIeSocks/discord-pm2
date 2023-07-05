@@ -2,5 +2,6 @@
   "token": "",
   "clientId": "",
   "guildId": "",
-  "monitorChannel": ""
+  "monitorChannel": "",
+  "ignoreModules": false
 }
