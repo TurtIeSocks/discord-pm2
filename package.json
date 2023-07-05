@@ -1,6 +1,6 @@
 {
   "name": "discord-pm2",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "dist/index.js",
   "author": "TurtIeSocks <58572875+TurtIeSocks@users.noreply.github.com>",
   "license": "MIT",

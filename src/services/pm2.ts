@@ -1,5 +1,5 @@
 import pm2 from 'pm2'
-import { HELPERS, log } from './logger'
+import config from 'config'
 import {
   ButtonBuilder,
   type APIEmbed,
@@ -8,6 +8,8 @@ import {
   Client,
   Colors,
 } from 'discord.js'
+
+import { HELPERS, log } from './logger'
 import { formatMemory, getFormattedCPU, getFormattedUptime } from './system'
 import { deleteMonitor } from '../discord/utils'
 
@@ -53,6 +55,7 @@ type PM2Env = Required<TypeAccessor<pm2.ProcessDescription, 'pm2_env'>> & {
   max_memory_restart?: number
   exec_mode?: 'fork_mode' | 'cluster'
   // args?: string[]
+  pmx_module?: boolean
   version?: string
   // versioning?: {
   //   branch?: string
@@ -74,6 +77,7 @@ interface Process {
   maxMemoryRestart: number
   execMode: Exclude<PM2Env['exec_mode'], undefined> | 'Unknown'
   version: string
+  module: boolean
 }
 
 /**
@@ -91,24 +95,32 @@ export const getProcessList = async (): Promise<Process[] | Error> => {
         processDescriptionList.map((process) => {
           const pm2Env = process.pm2_env as PM2Env
           const name = process.name || 'Unknown Process'
-          return [name, {
+          return [
             name,
-            cpu: process.monit?.cpu || 0,
-            memory: process.monit?.memory || 0,
-            uptime: pm2Env?.pm_uptime || 0,
-            instances: pm2Env?.instances || 0,
-            unplannedRestarts: pm2Env?.unstable_restarts || 0,
-            plannedRestarts: pm2Env?.restart_time || 0,
-            status: pm2Env?.status || 'stopped',
-            autorestart: pm2Env?.autorestart || false,
-            interpreter: pm2Env?.exec_interpreter || 'Unknown',
-            maxMemoryRestart: pm2Env?.max_memory_restart || 0,
-            execMode: pm2Env?.exec_mode || 'Unknown',
-            version: pm2Env?.version || 'Unknown',
-          }]
+            {
+              name,
+              cpu: process.monit?.cpu || 0,
+              memory: process.monit?.memory || 0,
+              uptime: pm2Env?.pm_uptime || 0,
+              instances: pm2Env?.instances || 0,
+              unplannedRestarts: pm2Env?.unstable_restarts || 0,
+              plannedRestarts: pm2Env?.restart_time || 0,
+              status: pm2Env?.status || 'stopped',
+              autorestart: pm2Env?.autorestart || false,
+              interpreter: pm2Env?.exec_interpreter || 'Unknown',
+              maxMemoryRestart: pm2Env?.max_memory_restart || 0,
+              execMode: pm2Env?.exec_mode || 'Unknown',
+              version: pm2Env?.version || 'Unknown',
+              module: pm2Env?.pmx_module || false,
+            },
+          ]
         }),
       )
-      return resolve(Object.values(processList))
+      return resolve(
+        Object.values(processList).filter(
+          (process) => !config.get('ignoreModules') || !process.module,
+        ),
+      )
     })
   })
 }
@@ -180,7 +192,9 @@ export const executeReload = (name?: string): Promise<string | Error> => {
 export const getEmbed = (process: Process): APIEmbed => {
   return {
     color: process.status === 'online' ? Colors.Green : Colors.Red,
-    title: `${process.name} - ${process.version}`,
+    title: `${process.name} - ${process.version}${
+      process.module ? ' (Module)' : ''
+    }`,
     fields: [
       {
         name: 'Status',
