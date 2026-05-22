@@ -1,14 +1,14 @@
 import type {
-  CommandInteraction,
-  SlashCommandBuilder,
-  Collection,
   AutocompleteInteraction,
-  CacheType,
-  SlashCommandSubcommandsOnlyBuilder,
-  ModalSubmitInteraction,
   ButtonInteraction,
+  CacheType,
+  Collection,
+  CommandInteraction,
+  ModalSubmitInteraction,
+  SlashCommandBuilder,
+  SlashCommandSubcommandsOnlyBuilder,
 } from 'discord.js'
-import { getMonitorChannel } from './discord/utils'
+import type { getMonitorChannel } from './discord/utils'
 
 export interface Command {
   data:

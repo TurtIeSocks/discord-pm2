@@ -1,4 +1,4 @@
-import { ActivityType, Client, Events } from 'discord.js'
+import { ActivityType, type Client, Events } from 'discord.js'
 import pm2 from 'pm2'
 
 import { HELPERS, log } from '../../services/logger'

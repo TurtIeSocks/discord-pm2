@@ -1,8 +1,7 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
-
-import type { Command } from '../../types'
 import { log } from '../../services/logger'
 import { getEmbed } from '../../services/system'
+import type { Command } from '../../types'
 
 export const system: Command = {
   data: new SlashCommandBuilder()

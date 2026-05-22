@@ -1,15 +1,14 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
-
-import type { Command } from '../../types'
 import {
-  GENERAL_INPUTS,
-  Inputs,
-  PROCESS_INPUTS,
   executeCommon,
   executeReload,
+  GENERAL_INPUTS,
   getEmbed,
   getProcessList,
+  type Inputs,
+  PROCESS_INPUTS,
 } from '../../services/pm2'
+import type { Command } from '../../types'
 
 export const pm2Command: Command = {
   data: new SlashCommandBuilder()

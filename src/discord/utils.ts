@@ -1,5 +1,5 @@
 import config from 'config'
-import { Client } from 'discord.js'
+import type { Client } from 'discord.js'
 import { HELPERS, log } from '../services/logger'
 
 /**

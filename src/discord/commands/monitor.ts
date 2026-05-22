@@ -3,14 +3,13 @@ import {
   PermissionFlagsBits,
   SlashCommandBuilder,
 } from 'discord.js'
-
-import type { Command } from '../../types'
 import {
-  ProcessInputs,
   executeCommon,
+  type ProcessInputs,
   updateAll,
   updateMonitor,
 } from '../../services/pm2'
+import type { Command } from '../../types'
 import { clearMonitorChannel } from '../utils'
 
 export const monitor: Command = {
@@ -82,7 +81,9 @@ export const monitor: Command = {
         }
       } else {
         const success = await updateAll(interaction.client)
-        await interaction.followUp(success ? 'Monitor updated' : 'Monitor failed to update')
+        await interaction.followUp(
+          success ? 'Monitor updated' : 'Monitor failed to update',
+        )
       }
       await interaction.deleteReply()
     }

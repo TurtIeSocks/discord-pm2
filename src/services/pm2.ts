@@ -1,17 +1,16 @@
-import pm2 from 'pm2'
 import config from 'config'
 import {
-  ButtonBuilder,
-  type APIEmbed,
-  ButtonStyle,
   ActionRowBuilder,
-  Client,
+  type APIEmbed,
+  ButtonBuilder,
+  ButtonStyle,
+  type Client,
   Colors,
 } from 'discord.js'
-
+import pm2 from 'pm2'
+import { deleteMonitor } from '../discord/utils'
 import { HELPERS, log } from './logger'
 import { formatMemory, getFormattedCPU, getFormattedUptime } from './system'
-import { deleteMonitor } from '../discord/utils'
 
 export const PROCESS_INPUTS = [
   'Start',

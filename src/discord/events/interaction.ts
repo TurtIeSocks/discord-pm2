@@ -1,4 +1,4 @@
-import { Client, Events, Interaction } from 'discord.js'
+import { type Client, Events, type Interaction } from 'discord.js'
 
 import { HELPERS, log } from '../../services/logger'
 
@@ -11,10 +11,10 @@ export const interaction = async (client: Client): Promise<void> => {
     const name = isModalSubmit
       ? interaction.customId
       : isAutocomplete || isCommand
-      ? interaction.commandName
-      : isButton
-      ? interaction.customId.split('-')[0]
-      : 'unknown'
+        ? interaction.commandName
+        : isButton
+          ? interaction.customId.split('-')[0]
+          : 'unknown'
 
     if (!isAutocomplete) {
       await interaction.deferReply({ ephemeral: true })

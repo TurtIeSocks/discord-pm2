@@ -1,5 +1,5 @@
-import { APIEmbed, Colors } from 'discord.js'
-import os from 'os'
+import os from 'node:os'
+import { type APIEmbed, Colors } from 'discord.js'
 
 const KILOBYTE = 1024
 const MEGABYTE = KILOBYTE * 1024
@@ -35,13 +35,13 @@ export const getMemory = () => {
  */
 export const formatMemory = (memory: number) => {
   if (memory >= GIGABYTE) {
-    return (memory / GIGABYTE).toFixed(2) + ' GB'
+    return `${(memory / GIGABYTE).toFixed(2)} GB`
   } else if (memory >= MEGABYTE) {
-    return (memory / MEGABYTE).toFixed(2) + ' MB'
+    return `${(memory / MEGABYTE).toFixed(2)} MB`
   } else if (memory >= KILOBYTE) {
-    return (memory / KILOBYTE).toFixed(2) + ' KB'
+    return `${(memory / KILOBYTE).toFixed(2)} KB`
   } else {
-    return memory + ' bytes'
+    return `${memory} bytes`
   }
 }
 
@@ -64,17 +64,17 @@ export const getFormattedUptime = (uptime = os.uptime()) => {
 
   const formatted: string[] = []
   if (days > 0) {
-    formatted.push(days + ' day' + (days > 1 ? 's' : ''))
+    formatted.push(`${days} day${days > 1 ? 's' : ''}`)
   }
   if (hours > 0) {
-    formatted.push(hours + ' hour' + (hours > 1 ? 's' : ''))
+    formatted.push(`${hours} hour${hours > 1 ? 's' : ''}`)
   }
   if (days === 0)
     if (minutes > 0) {
-      formatted.push(minutes + ' minute' + (minutes > 1 ? 's' : ''))
+      formatted.push(`${minutes} minute${minutes > 1 ? 's' : ''}`)
     }
   if (days === 0 && hours === 0) {
-    formatted.push(seconds + ' second' + (seconds > 1 ? 's' : ''))
+    formatted.push(`${seconds} second${seconds > 1 ? 's' : ''}`)
   }
   return formatted.join(', ')
 }

@@ -1,8 +1,7 @@
-import { Client, Collection } from 'discord.js'
 import config from 'config'
-
-import * as events from './events'
+import { Client, Collection } from 'discord.js'
 import * as commands from './commands'
+import * as events from './events'
 import { getMonitorChannel } from './utils'
 
 export const startDiscord = async () => {
@@ -10,7 +9,9 @@ export const startDiscord = async () => {
     intents: ['GuildMessages', 'GuildMembers', 'Guilds', 'DirectMessages'],
   })
 
-  Object.values(events).forEach((event) => event(client))
+  Object.values(events).forEach((event) => {
+    event(client)
+  })
 
   await client.login(config.get('token'))
 

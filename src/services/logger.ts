@@ -1,6 +1,6 @@
-import logger from 'loglevel'
 import chalk from 'chalk'
-import { Client, MessageFlags } from 'discord.js'
+import { type Client, MessageFlags } from 'discord.js'
+import logger from 'loglevel'
 
 export const log = logger.getLogger('logger')
 
