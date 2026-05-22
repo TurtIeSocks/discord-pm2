@@ -1,22 +1,19 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "CommonJS",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "rootDir": "./src",
     "outDir": "./dist/",
     "strict": true,
-    "importHelpers": true,
-    "experimentalDecorators": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "removeComments": true,
-    "typeRoots": ["node_modules/@types"],
-    "types": ["bun", "node"],
-    "sourceMap": false
+    "types": ["node"],
+    "sourceMap": true
   },
   "include": ["./src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "src/discord/register.ts"]
+  "exclude": ["node_modules", "dist"]
 }

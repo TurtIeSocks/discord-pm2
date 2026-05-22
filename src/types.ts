@@ -2,25 +2,21 @@ import type {
   AutocompleteInteraction,
   ButtonInteraction,
   CacheType,
+  ChatInputCommandInteraction,
   Collection,
-  CommandInteraction,
   ModalSubmitInteraction,
-  SlashCommandBuilder,
-  SlashCommandSubcommandsOnlyBuilder,
+  SharedSlashCommand,
 } from 'discord.js'
-import type { getMonitorChannel } from './discord/utils'
+import type { getMonitorChannel } from './discord/utils.js'
 
 export interface Command {
-  data:
-    | SlashCommandBuilder
-    | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>
-    | SlashCommandSubcommandsOnlyBuilder
+  data: SharedSlashCommand
   autoComplete?: (
     interaction: AutocompleteInteraction<CacheType>,
   ) => Promise<void>
   modal?: (interaction: ModalSubmitInteraction) => Promise<void>
   button?: (interaction: ButtonInteraction) => Promise<void>
-  run: (interaction: CommandInteraction) => Promise<void>
+  run: (interaction: ChatInputCommandInteraction) => Promise<void>
 }
 
 declare module 'discord.js' {

@@ -1,29 +1,30 @@
-import { type Client, Events, type Interaction } from 'discord.js'
+import { type Client, Events, type Interaction, MessageFlags } from 'discord.js'
 
-import { HELPERS, log } from '../../services/logger'
+import { HELPERS, log } from '../../services/logger.js'
+import { CUSTOM_ID_DELIMITER } from '../embeds/process.js'
 
 export const interaction = async (client: Client): Promise<void> => {
   client.on(Events.InteractionCreate, async (interaction: Interaction) => {
     const isModalSubmit = interaction.isModalSubmit()
     const isAutocomplete = interaction.isAutocomplete()
-    const isCommand = interaction.isCommand()
+    const isChatInput = interaction.isChatInputCommand()
     const isButton = interaction.isButton()
     const name = isModalSubmit
       ? interaction.customId
-      : isAutocomplete || isCommand
+      : isAutocomplete || isChatInput
         ? interaction.commandName
         : isButton
-          ? interaction.customId.split('-')[0]
+          ? interaction.customId.split(CUSTOM_ID_DELIMITER)[0]
           : 'unknown'
 
     if (!isAutocomplete) {
-      await interaction.deferReply({ ephemeral: true })
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral })
     }
-    log.debug({ name, isModalSubmit, isAutocomplete, isCommand })
+    log.debug({ name, isModalSubmit, isAutocomplete, isChatInput, isButton })
     const command = interaction.client.ctx.commands.get(name)
     try {
-      if (!command) throw new Error(`Command not found`)
-      if (isCommand) {
+      if (!command) throw new Error(`Command not found: ${name}`)
+      if (isChatInput) {
         await command.run(interaction)
       } else if (isModalSubmit) {
         if (command.modal) await command.modal(interaction)
@@ -42,14 +43,16 @@ export const interaction = async (client: Client): Promise<void> => {
       log.error(
         HELPERS.discord,
         name,
-        interaction.user.username,
+        interaction.user.tag,
         interaction.guild?.name ?? interaction.guildId ?? 'DM',
         err,
       )
       if (isAutocomplete) {
-        await interaction.respond([])
+        await interaction.respond([]).catch(() => {})
       } else {
-        await interaction.followUp(`An error has occurred with input: ${name}`)
+        await interaction
+          .followUp(`An error has occurred with input: ${name}`)
+          .catch(() => {})
       }
     }
   })

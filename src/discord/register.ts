@@ -1,21 +1,12 @@
+import { fileURLToPath } from 'node:url'
 import config from 'config'
-import { REST, Routes } from 'discord.js'
+import {
+  REST,
+  type RESTPostAPIApplicationCommandsResult,
+  Routes,
+} from 'discord.js'
 
-import * as commands from './commands'
-
-interface CommandType {
-  id: string
-  application_id: string
-  version: string
-  default_member_permissions: string
-  type: number
-  name: string
-  name_localizations: null
-  description: string
-  description_localizations: null
-  guild_id: string
-  nsfw: boolean
-}
+import * as commands from './commands/index.js'
 
 export const register = async () => {
   if (process.env.NODE_ENV === 'development') return
@@ -23,20 +14,13 @@ export const register = async () => {
   const rest = new REST().setToken(config.get('token'))
 
   try {
-    await rest.put(
-      Routes.applicationGuildCommands(
-        config.get('clientId'),
-        config.get('guildId'),
-      ),
-      { body: [] },
-    )
     const data = (await rest.put(
       Routes.applicationGuildCommands(
         config.get('clientId'),
         config.get('guildId'),
       ),
       { body: Object.values(commands).map((cmd) => cmd.data.toJSON()) },
-    )) as CommandType[]
+    )) as RESTPostAPIApplicationCommandsResult[]
     console.log(
       `Successfully registered application commands: ${data
         .map((cmd) => cmd.name)
@@ -47,7 +31,8 @@ export const register = async () => {
   }
 }
 
-if (require.main === module) {
+const entry = process.argv[1]
+if (entry && fileURLToPath(import.meta.url) === entry) {
   console.log('Registering application commands')
   register()
 }

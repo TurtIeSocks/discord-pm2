@@ -8,10 +8,38 @@ const SECONDS_IN_DAY = 24 * 60 * 60
 const SECONDS_IN_HOUR = 60 * 60
 const SECONDS_IN_MINUTES = 60
 
+interface CpuSnapshot {
+  total: number
+  idle: number
+}
+
+const snapshotCpus = (): CpuSnapshot => {
+  let total = 0
+  let idle = 0
+  for (const cpu of os.cpus()) {
+    const t = cpu.times
+    total += t.user + t.nice + t.sys + t.idle + t.irq
+    idle += t.idle
+  }
+  return { total, idle }
+}
+
+let lastSnapshot = snapshotCpus()
+
 /**
- * Returns CPU usage in %
+ * Returns aggregate CPU usage across all cores in % (0-100), computed from
+ * the delta in CPU times since the last call. First call after process
+ * start measures usage since boot.
  */
-export const getCPU = () => Math.round(os.loadavg()[0] * 100) / 100
+export const getCPU = () => {
+  const current = snapshotCpus()
+  const totalDelta = current.total - lastSnapshot.total
+  const idleDelta = current.idle - lastSnapshot.idle
+  lastSnapshot = current
+  if (totalDelta <= 0) return 0
+  const usage = (1 - idleDelta / totalDelta) * 100
+  return Math.round(usage * 100) / 100
+}
 
 /**
  * Returns a nicely formatted string of CPU usage
@@ -69,10 +97,9 @@ export const getFormattedUptime = (uptime = os.uptime()) => {
   if (hours > 0) {
     formatted.push(`${hours} hour${hours > 1 ? 's' : ''}`)
   }
-  if (days === 0)
-    if (minutes > 0) {
-      formatted.push(`${minutes} minute${minutes > 1 ? 's' : ''}`)
-    }
+  if (days === 0 && minutes > 0) {
+    formatted.push(`${minutes} minute${minutes > 1 ? 's' : ''}`)
+  }
   if (days === 0 && hours === 0) {
     formatted.push(`${seconds} second${seconds > 1 ? 's' : ''}`)
   }

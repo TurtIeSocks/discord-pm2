@@ -1,19 +1,15 @@
 import config from 'config'
 import { Client, Collection } from 'discord.js'
-import * as commands from './commands'
-import * as events from './events'
-import { getMonitorChannel } from './utils'
+import pm2 from 'pm2'
+import { HELPERS, log } from '../services/logger.js'
+import * as commands from './commands/index.js'
+import * as events from './events/index.js'
+import { getMonitorChannel } from './utils.js'
 
 export const startDiscord = async () => {
   const client = new Client({
-    intents: ['GuildMessages', 'GuildMembers', 'Guilds', 'DirectMessages'],
+    intents: ['Guilds', 'GuildMessages'],
   })
-
-  Object.values(events).forEach((event) => {
-    event(client)
-  })
-
-  await client.login(config.get('token'))
 
   client.ctx = {
     commands: new Collection(
@@ -21,10 +17,40 @@ export const startDiscord = async () => {
     ),
     monitor: {
       messages: new Collection(),
-      channel: await getMonitorChannel(client),
+      channel: null,
       interval: null,
     },
   }
+
+  const eventHandlers = Object.values(events) as Array<
+    (c: Client) => void | Promise<void>
+  >
+  for (const event of eventHandlers) {
+    event(client)
+  }
+
+  await client.login(config.get('token'))
+
+  client.ctx.monitor.channel = await getMonitorChannel(client)
+
+  const shutdown = (signal: NodeJS.Signals) => {
+    log.info(HELPERS.discord, `Received ${signal}, shutting down`)
+    if (client.ctx.monitor.interval) {
+      clearInterval(client.ctx.monitor.interval)
+      client.ctx.monitor.interval = null
+    }
+    try {
+      pm2.disconnect()
+    } catch (err) {
+      log.error(HELPERS.discord, 'pm2.disconnect error', err)
+    }
+    client
+      .destroy()
+      .catch((err) => log.error(HELPERS.discord, 'client.destroy error', err))
+      .finally(() => process.exit(0))
+  }
+  process.on('SIGTERM', shutdown)
+  process.on('SIGINT', shutdown)
 
   return client
 }

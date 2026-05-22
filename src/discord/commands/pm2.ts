@@ -1,14 +1,25 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
+import {
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js'
 import {
   executeCommon,
+  executeDump,
   executeReload,
+  executeReloadLogs,
   GENERAL_INPUTS,
-  getEmbed,
   getProcessList,
   type Inputs,
   PROCESS_INPUTS,
-} from '../../services/pm2'
-import type { Command } from '../../types'
+} from '../../services/pm2.js'
+import type { Command } from '../../types.js'
+import { getProcessEmbed } from '../embeds/process.js'
+
+const ephemeral = (content: string) => ({
+  content,
+  flags: MessageFlags.Ephemeral as const,
+})
 
 export const pm2Command: Command = {
   data: new SlashCommandBuilder()
@@ -35,11 +46,8 @@ export const pm2Command: Command = {
         .setAutocomplete(true),
     ),
   autoComplete: async (interaction) => {
-    const processes = await getProcessList()
-
-    if (processes instanceof Error) {
-      await interaction.respond([])
-    } else {
+    try {
+      const processes = await getProcessList()
       await interaction.respond([
         { name: 'all', value: 'all' },
         ...processes.map((process) => ({
@@ -47,35 +55,40 @@ export const pm2Command: Command = {
           value: process.name,
         })),
       ])
+    } catch {
+      await interaction.respond([])
     }
   },
   run: async (interaction) => {
-    const rawCommand = interaction.options.get('command', true)
-    const command = rawCommand.value as Inputs
-    const name = interaction.options.get('name')?.value as string | undefined
+    const command = interaction.options.getString('command', true) as Inputs
+    const name = interaction.options.getString('name') ?? undefined
 
-    if (command === 'list') {
-      const processes = await getProcessList()
-      if (processes instanceof Error) {
-        await interaction.followUp({
-          content: `Error: ${processes.message}`,
-          ephemeral: true,
-        })
-      } else {
+    try {
+      if (command === 'list') {
+        const processes = await getProcessList()
         await interaction.followUp({
           content: processes.length ? '' : 'No processes found.',
-          embeds: processes.map((process) => getEmbed(process)),
+          embeds: processes.map((process) => getProcessEmbed(process)),
         })
+        return
       }
-    } else {
-      const response =
+      if (command === 'dump') {
+        const message = await executeDump()
+        await interaction.followUp(ephemeral(message))
+        return
+      }
+      if (command === 'reloadlogs') {
+        const message = await executeReloadLogs()
+        await interaction.followUp(ephemeral(message))
+        return
+      }
+      const message =
         command === 'reload'
           ? await executeReload(name)
           : await executeCommon(command, name)
-      await interaction.followUp({
-        content: typeof response === 'string' ? response : response.message,
-        ephemeral: true,
-      })
+      await interaction.followUp(ephemeral(message))
+    } catch (err) {
+      await interaction.followUp(ephemeral((err as Error).message))
     }
   },
 }

@@ -1,4 +1,3 @@
 node_modules
 dist
 config/local.json
-yarn-error.log
