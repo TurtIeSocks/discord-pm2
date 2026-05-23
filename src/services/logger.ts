@@ -1,6 +1,6 @@
-import logger from 'loglevel'
 import chalk from 'chalk'
-import { Client, MessageFlags } from 'discord.js'
+import { type Client, MessageFlags } from 'discord.js'
+import logger from 'loglevel'
 
 export const log = logger.getLogger('logger')
 
@@ -32,12 +32,11 @@ log.setLevel((process.env.LOG_LEVEL as logger.LogLevelDesc) || 'info')
 
 export const logToDiscord = async (
   client: Client,
-  channel: string,
+  channelId: string,
   content: string,
 ) => {
-  await client.channels.fetch(channel).then(async (channel) => {
-    if (channel?.isTextBased()) {
-      channel.send({ content, flags: MessageFlags.SuppressEmbeds })
-    }
-  })
+  const channel = await client.channels.fetch(channelId)
+  if (channel?.isTextBased() && channel.isSendable()) {
+    await channel.send({ content, flags: MessageFlags.SuppressEmbeds })
+  }
 }

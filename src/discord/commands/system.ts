@@ -1,8 +1,7 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
-
-import type { Command } from '../../types'
-import { log } from '../../services/logger'
-import { getEmbed } from '../../services/system'
+import { log } from '../../services/logger.js'
+import { getEmbed } from '../../services/system.js'
+import type { Command } from '../../types.js'
 
 export const system: Command = {
   data: new SlashCommandBuilder()
@@ -10,8 +9,8 @@ export const system: Command = {
     .setDescription('View system status')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
   run: async (interaction) => {
-    log.info('system command called', interaction.user.username)
-    interaction.followUp({
+    log.info('system command called', interaction.user.tag)
+    await interaction.followUp({
       embeds: [getEmbed()],
     })
   },
