@@ -20,7 +20,7 @@
     "config": "^3.3.12",
     "discord.js": "^14.26.4",
     "loglevel": "^1.9.2",
-    "pm2": "^7.0.1"
+    "pm2": "^7.0.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
