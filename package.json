@@ -23,10 +23,10 @@
     "pm2": "^7.0.4"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.16",
-    "@types/bun": "^1.3.14",
+    "@biomejs/biome": "^2.6.4",
+    "@types/bun": "^1.4.4",
     "@types/config": "^4.4.0",
-    "@types/node": "^25.9.1",
+    "@types/node": "^25.9.9",
     "typescript": "^6.0.3"
   }
 }
